@@ -15,23 +15,47 @@
 #
 Puppet::Type.newtype(:concat_fragment) do
   @doc = "Create a concat fragment. If you do not create an associated
-          concat_build object, then one will be created for you and the
+          concat object, then one will be created for you and the
           defaults will be used."
+
+  ensurable
 
   newparam(:name) do
     isnamevar
-    validate do |value|
-      fail Puppet::Error, "name is missing group or name. Name format must be 'group+fragment_name'" if value !~ /.+\+.+/
-      fail Puppet::Error, "name cannot include '../'!" if value =~ /\.\.\//
+  end
+
+  newparam(:order) do
+    desc "Order of the concat"
+    defaultto '10'
+
+  end
+
+  newparam(:target) do
+    desc "Fully qualified path to copy output file to"
+    defaultto 'unknown'
+
+    validate do |path|
+      unless path =~ /^\/$/ or path =~ /^\/[^\/]/
+        fail Puppet::Error, "File paths must be fully qualified, not '#{path}'"
+      end
     end
   end
 
-  newparam(:frag_group) do
+  newparam(:safetarget) do
     desc "Ignore me, I'm a convienience stub"
     defaultto 'fake'
 
     munge do |value|
-      @resource[:name].split('+').first
+      @resource[:target].gsub /\//, '_'
+    end
+  end
+
+  newparam(:safename) do
+    desc "Ignore me, I'm a convienience stub"
+    defaultto 'fake'
+
+    munge do |value|
+      @resource[:name].gsub /\//, '_'
     end
   end
 
@@ -40,7 +64,7 @@ Puppet::Type.newtype(:concat_fragment) do
     defaultto 'fake'
 
     munge do |value|
-      @resource[:name].split('+')[1..-1].join('+')
+      value = "#{resource[:order]}_#{resource[:safename]}"
     end
   end
 
@@ -66,11 +90,11 @@ Puppet::Type.newtype(:concat_fragment) do
   end
 
   # This is only here because, at this point, we can be sure that the catalog
-  # has been compiled. This checks to see if we have a concat_build specified
+  # has been compiled. This checks to see if we have a concat specified
   # for our particular concat_fragment group.
   autorequire(:file) do
-    if not catalog.resource("Concat_build[#{self[:frag_group]}]") then
-      err "No 'concat_build' specified for group '#{self[:frag_group]}'"
+    if not catalog.resource("Concat[#{self[:target]}]") then
+      err "No 'concat' specified for group '#{self[:target]}'"
     end
     ""
   end
@@ -80,12 +104,43 @@ Puppet::Type.newtype(:concat_fragment) do
   end
 
   def create_default_build
-    # If the user did not specify a concat_build object in their manifest,
+    # If the user did not specify a concat object in their manifest,
     # assume that they want the defaults and create one for them.
-    if not @catalog.resource("Concat_build[#{self[:frag_group]}]") then
-      debug "Auto-adding 'concat_build' resource Concat_build['#{self[:frag_group]}'] to the catalog"
-      @catalog.add_resource(Puppet::Type.type(:concat_build).new(
-        :name => "#{self[:frag_group]}"
+    if not @catalog.resource("Concat[#{self[:target]}]") then
+      debug "Auto-adding 'concat' resource Concat['#{self[:target]}'] to the catalog"
+      @catalog.add_resource(Puppet::Type.type(:concat).new(
+        :name => "#{self[:target]}"
+      ))
+    end
+    if not @catalog.resource("File[#{Puppet[:vardir]}/concat]") then
+      debug "Auto-adding 'concat' resource File[#{Puppet[:vardir]}/concat] to the catalog"
+      @catalog.add_resource(Puppet::Type.type(:file).new(
+        :name => "#{Puppet[:vardir]}/concat",
+        :ensure => 'directory',
+        :owner => 'puppet',
+        :group => 'puppet',
+        :mode => '0750'
+      ))
+      @catalog.add_resource(Puppet::Type.type(:file).new(
+        :name => "#{Puppet[:vardir]}/concat/output",
+        :ensure => 'directory',
+        :owner => 'puppet',
+        :group => 'puppet',
+        :mode => '0750'
+      ))
+      @catalog.add_resource(Puppet::Type.type(:file).new(
+        :name => "#{Puppet[:vardir]}/concat/fragments",
+        :ensure => 'directory',
+        :owner => 'puppet',
+        :group => 'puppet',
+        :mode => '0750'
+      ))
+      @catalog.add_resource(Puppet::Type.type(:file).new(
+        :name => "#{Puppet[:vardir]}/concat/fragments/#{self[:safetarget]}",
+        :ensure => 'directory',
+        :owner => 'root',
+        :group => 'root',
+        :mode => '0750'
       ))
     end
   end
@@ -96,19 +151,19 @@ Puppet::Type.newtype(:concat_fragment) do
 
     # Find everything that we shouldn't delete.
     catalog.resources.find_all { |r|
-      (r.is_a?(Puppet::Type.type(:concat_fragment)) and r[:frag_group] == self[:frag_group] ) or
-      (r.is_a?(Puppet::Type.type(:concat_build)) and r[:target] and File.dirname(r[:target]) == "#{Puppet[:vardir]}/concat/fragments/#{self[:frag_group]}")
+      (r.is_a?(Puppet::Type.type(:concat_fragment)) and r[:target] == self[:target] ) or
+      (r.is_a?(Puppet::Type.type(:concat)) and r[:name] == self[:target])
     }.each do |frag_res|
       if frag_res.is_a?(Puppet::Type.type(:concat_fragment)) then
-        known_resources << "#{Puppet[:vardir]}/concat/fragments/#{frag_res[:frag_group]}/#{frag_res[:frag_name]}"
-      elsif frag_res.is_a?(Puppet::Type.type(:concat_build)) then
-        known_resources << frag_res[:target]
+        known_resources << "#{Puppet[:vardir]}/concat/fragments/#{frag_res[:safetarget]}/#{frag_res[:frag_name]}"
+      elsif frag_res.is_a?(Puppet::Type.type(:concat)) then
+        known_resources << frag_res[:name]
       else
         debug "Woops, found an unknown fragment of type #{frag_res.class}"
       end
     end
 
-    (Dir.glob("#{Puppet[:vardir]}/concat/fragments/#{self[:frag_group]}/*") - known_resources).each do |to_del|
+    (Dir.glob("#{Puppet[:vardir]}/concat/fragments/#{self[:safetarget]}/*") - known_resources).each do |to_del|
       debug "Deleting Unused Fragment: #{to_del}"
       FileUtils.rm(to_del)
     end

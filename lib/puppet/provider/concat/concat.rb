@@ -13,12 +13,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Puppet::Type.type(:concat_build ).provide :concat_build do
+Puppet::Type.type(:concat ).provide :concat do
   require 'fileutils'
 
-  desc "concat_build provider"
+  desc "concat provider"
+
+  def create
+    begin
+      insync?(@resource[:name],build_file)
+      sync
+    rescue Exception => e
+      fail Puppet::Error, e
+    end
+  end
+
+  def destroy
+    begin
+      File.unlink(@resource[:name])
+    rescue Exception => e
+      fail Puppet::Error, e
+    end
+  end
+
+  def exists?
+      File.exist?(@resource[:name])
+  end
 
   def insync?(orig_file,new_file)
+
     sync=false
 
     !orig_file and return false
@@ -30,7 +52,7 @@ Puppet::Type.type(:concat_build ).provide :concat_build do
     buf_size = 1024
     offset = 0
     found_diff = false
-    
+
     begin
       ofh = File.open(orig_file,'r')
       nfh = File.open(new_file,'r')
@@ -59,19 +81,19 @@ Puppet::Type.type(:concat_build ).provide :concat_build do
 
   # Build a consistent temp file.
   def build_file
-    if File.directory?("#{Puppet[:vardir]}/concat/fragments/#{@resource[:name]}") then
+    if File.directory?("#{Puppet[:vardir]}/concat/fragments/#{@resource[:safename]}") then
       begin
         FileUtils.mkdir_p("#{Puppet[:vardir]}/concat/output")
 
-        ofh = File.open("#{Puppet[:vardir]}/concat/output/#{@resource[:name]}.new", "w+")
+        ofh = File.open("#{Puppet[:vardir]}/concat/output/#{@resource[:safename]}.new", "w+")
         input_lines = Array.new
-        Dir.chdir("#{Puppet[:vardir]}/concat/fragments/#{@resource[:name]}") do
+        Dir.chdir("#{Puppet[:vardir]}/concat/fragments/#{@resource[:safename]}") do
           Array(@resource[:order]).flatten.each do |pattern|
              Dir.glob(pattern).sort_by{ |k| human_sort(k) }.each do |file|
 
               prev_line = nil
               File.open(file).each do |line|
-                line.chomp!
+                # line.chomp!
                 if @resource.squeeze_blank? and line =~ /^\s*$/ then
                   if prev_line == :whitespace then
                     next
@@ -87,7 +109,10 @@ Puppet::Type.type(:concat_build ).provide :concat_build do
                   if @resource.sort? or not @resource[:unique].eql?(:false) then
                     input_lines.push(line)
                   else
-                    ofh.puts(line)
+                    # XXX replaced puts with print to prevent newlines
+                    #debug "nl line is :#{line}:" if line =~ /\n$/
+                    #debug "line is :#{line}:" if line !~ /\n$/
+                    ofh.print(line)
                   end
                 end
 
@@ -95,14 +120,17 @@ Puppet::Type.type(:concat_build ).provide :concat_build do
 
               if input_lines.empty? then
                 # Separate the files by the specified delimiter.
-                ofh.seek(-1, IO::SEEK_END)
-                if ofh.getc.chr.eql?("\n") then
-                  ofh.seek(-1, IO::SEEK_END)
-                end
-                if @resource[:append_newline].eql?(:false) then
-                  ofh.print(String(@resource[:file_delimiter]))
-                else
-                  ofh.puts(String(@resource[:file_delimiter]))
+                # XXX hack for matching ripienaar
+                if @resource[:file_delimiter] != "" then
+                    ofh.seek(-1, IO::SEEK_END)
+                    if ofh.getc.chr.eql?("\n") then
+                      ofh.seek(-1, IO::SEEK_END)
+                    end
+                    if @resource[:append_newline].eql?(:false) then
+                      ofh.print(String(@resource[:file_delimiter]))
+                    else
+                      ofh.puts(String(@resource[:file_delimiter]))
+                    end
                 end
               end
             end
@@ -154,29 +182,30 @@ Puppet::Type.type(:concat_build ).provide :concat_build do
         fail Puppet::Error, e
       end
     elsif not @resource.quiet? then
-      fail Puppet::Error, "The fragments directory at '#{Puppet[:vardir]}/concat/fragments/#{@resource[:name]}' does not exist!"
+      fail Puppet::Error, "The fragments directory at '#{Puppet[:vardir]}/concat/fragments/#{@resource[:safename]}' does not exist!"
     end
     return ofh_name
 
   end
 
   def sync
-    if @resource[:target] and check_onlyif then
-      orig_file = "#{Puppet[:vardir]}/concat/output/#{@resource[:name]}.new"
+    if @resource[:safename] and check_onlyif then
+      orig_file = "#{Puppet[:vardir]}/concat/output/#{@resource[:safename]}.new"
       out_file = "#{File.dirname(orig_file)}/#{File.basename(orig_file,'.new')}.out"
 
-      debug "Moving #{orig_file} to #{@resource[:target]}"
+      debug "Moving #{orig_file} to #{@resource[:name]}"
 
       FileUtils.cp(orig_file, out_file)
-      FileUtils.mv(orig_file, @resource[:target])
-    elsif @resource[:target] then
-      debug "Not copying to #{@resource[:target]}, 'onlyif' check failed"
+      FileUtils.mv(orig_file, @resource[:name])
+
+    elsif @resource[:name] then
+      debug "Not copying to #{@resource[:name]}, 'onlyif' check failed"
     elsif @resource[:onlyif] then
       debug "Specified 'onlyif' without 'target', ignoring."
     end
   end
 
-  private 
+  private
 
   # Return true if the command returns 0.
   def check_command(value)
@@ -185,11 +214,12 @@ Puppet::Type.type(:concat_build ).provide :concat_build do
     if status.exitstatus == 127
       raise ArgumentError, output
     end
- 
+
     status.exitstatus == 0
   end
 
   def check_onlyif
+
     success = true
 
     if @resource[:onlyif] then
@@ -225,3 +255,4 @@ Puppet::Type.type(:concat_build ).provide :concat_build do
   end
 
 end
+

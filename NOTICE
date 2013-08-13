@@ -1,0 +1,11 @@
+Author: Robert Fielding <robert.fielding@enterproid.com>
+Date:   Tue Aug 13 11:33 2013 -0100
+
+    Fork https://github.com/onyxpoint/pupmod-concat into something that more
+    closely resembles https://github.com/puppetlabs/puppetlabs-concat.
+
+    We have done this as we have used concat in multiple locations and wanted
+    to avoid a large API change, but also to learn some puppet internals.
+    The experience and speed up gained should inspire further native types.
+
+

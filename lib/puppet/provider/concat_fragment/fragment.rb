@@ -19,7 +19,7 @@ Puppet::Type.type(:concat_fragment).provide :concat_fragment do
   desc "concat_fragment provider"
 
   def retrieve
-      cur_file = "#{Puppet[:vardir]}/concat/fragments/#{@resource[:frag_group]}/#{@resource[:frag_name]}"
+      cur_file = "#{Puppet[:vardir]}/concat/fragments/#{@resource[:safetarget]}/#{@resource[:frag_name]}"
 
       cur_val = nil
       begin
@@ -33,16 +33,39 @@ Puppet::Type.type(:concat_fragment).provide :concat_fragment do
 
   def create
     begin
-      group = @resource[:frag_group]
+      safetarget = @resource[:safetarget]
       fragment = @resource[:frag_name]
 
-      FileUtils.mkdir_p("#{Puppet[:vardir]}/concat/fragments/#{group}")
-      f = File.new("#{Puppet[:vardir]}/concat/fragments/#{group}/#{fragment}", "w")
+      FileUtils.mkdir_p("#{Puppet[:vardir]}/concat/fragments/#{safetarget}")
+      f = File.new("#{Puppet[:vardir]}/concat/fragments/#{safetarget}/#{fragment}", "w")
       f.print @resource[:content]
       f.close
     rescue Exception => e
       fail Puppet::Error, e
     end
   end
+
+  def destroy
+    begin
+      safetarget = @resource[:safetarget]
+      fragment = @resource[:frag_name]
+
+      File.unlink("#{Puppet[:vardir]}/concat/fragments/#{safetarget}/#{fragment}")
+    rescue Exception => e
+      fail Puppet::Error, e
+    end
+  end
+
+  def exists?
+    begin
+      safetarget = @resource[:safetarget]
+      fragment = @resource[:frag_name]
+
+      File.exist?("#{Puppet[:vardir]}/concat/fragments/#{safetarget}/#{fragment}")
+    rescue Exception => e
+      fail Puppet::Error, e
+    end
+  end
+
 
 end
