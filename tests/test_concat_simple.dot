@@ -1,0 +1,89 @@
+digraph Resources {
+    label = "Resources"
+    "File[/tmp/foo]" [
+        fontsize = 8,
+        label = "File[/tmp/foo]"
+    ]
+
+    "Schedule[never]" [
+        fontsize = 8,
+        label = "Schedule[never]"
+    ]
+
+    "Schedule[hourly]" [
+        fontsize = 8,
+        label = "Schedule[hourly]"
+    ]
+
+    "Concat_fragment[test_concat]" [
+        fontsize = 8,
+        label = "Concat_fragment[test_concat]"
+    ]
+
+    "Concat[/tmp/foo]" [
+        fontsize = 8,
+        label = "Concat[/tmp/foo]"
+    ]
+
+    "Schedule[daily]" [
+        fontsize = 8,
+        label = "Schedule[daily]"
+    ]
+
+    "Stage[main]" [
+        fontsize = 8,
+        label = "Stage[main]"
+    ]
+
+    "Schedule[weekly]" [
+        fontsize = 8,
+        label = "Schedule[weekly]"
+    ]
+
+    "Filebucket[puppet]" [
+        fontsize = 8,
+        label = "Filebucket[puppet]"
+    ]
+
+    "Class[Main]" [
+        fontsize = 8,
+        label = "Class[Main]"
+    ]
+
+    "Class[Settings]" [
+        fontsize = 8,
+        label = "Class[Settings]"
+    ]
+
+    "File[/var/lib/puppet/concat]" [
+        fontsize = 8,
+        label = "File[/var/lib/puppet/concat]"
+    ]
+
+    "Schedule[monthly]" [
+        fontsize = 8,
+        label = "Schedule[monthly]"
+    ]
+
+    "Schedule[puppet]" [
+        fontsize = 8,
+        label = "Schedule[puppet]"
+    ]
+
+    "Class[Main]" -> "Concat_fragment[test_concat]" [
+        fontsize = 8
+    ]
+
+    "Class[Main]" -> "Concat[/tmp/foo]" [
+        fontsize = 8
+    ]
+
+    "Stage[main]" -> "Class[Main]" [
+        fontsize = 8
+    ]
+
+    "Stage[main]" -> "Class[Settings]" [
+        fontsize = 8
+    ]
+
+}

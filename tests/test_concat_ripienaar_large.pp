@@ -1,6 +1,6 @@
 #!/usr/bin/env puppet apply
 
-$target_dir = "/tmp/test_concat_examples"
+$target_dir = "/tmp/test_concat_ripienaar"
 $target_large = "${target_dir}/test_concat_large.dat"
 
 file { $target_dir:
@@ -20,7 +20,7 @@ define test_concat_large($target) {
 		}
 	}
 
-	concat_fragment { "filetest_${name}":
+  concat::fragment { "filetest_${name}":
     target  => $target,
 		content => $name,
 	}
@@ -34,7 +34,7 @@ define test_concat_many($target) {
     mode   => '0444',
   }
 
-  concat_fragment { "many_filetest_${name}":
+  concat::fragment { "many_filetest_${name}":
     target  => "${target}/${name}",
 		content => $name,
 	}

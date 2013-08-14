@@ -1,0 +1,187 @@
+digraph Resources {
+    label = "Resources"
+    "File[/var/lib/puppet/concat/bin/concatfragments.sh]" [
+        fontsize = 8,
+        label = "File[/var/lib/puppet/concat/bin/concatfragments.sh]"
+    ]
+
+    "File[/var/lib/puppet/concat]" [
+        fontsize = 8,
+        label = "File[/var/lib/puppet/concat]"
+    ]
+
+    "File[/var/lib/puppet/concat/_tmp_foo/fragments/10_test_concat]" [
+        fontsize = 8,
+        label = "File[/var/lib/puppet/concat/_tmp_foo/fragments/10_test_concat]"
+    ]
+
+    "Exec[concat_/tmp/foo]" [
+        fontsize = 8,
+        label = "Exec[concat_/tmp/foo]"
+    ]
+
+    "File[/var/lib/puppet/concat/_tmp_foo/fragments.concat.out]" [
+        fontsize = 8,
+        label = "File[/var/lib/puppet/concat/_tmp_foo/fragments.concat.out]"
+    ]
+
+    "Concat[/tmp/foo]" [
+        fontsize = 8,
+        label = "Concat[/tmp/foo]"
+    ]
+
+    "Schedule[hourly]" [
+        fontsize = 8,
+        label = "Schedule[hourly]"
+    ]
+
+    "File[/usr/local/bin/concatfragments.sh]" [
+        fontsize = 8,
+        label = "File[/usr/local/bin/concatfragments.sh]"
+    ]
+
+    "File[/var/lib/puppet/concat/_tmp_foo/fragments]" [
+        fontsize = 8,
+        label = "File[/var/lib/puppet/concat/_tmp_foo/fragments]"
+    ]
+
+    "Schedule[daily]" [
+        fontsize = 8,
+        label = "Schedule[daily]"
+    ]
+
+    "Class[Settings]" [
+        fontsize = 8,
+        label = "Class[Settings]"
+    ]
+
+    "File[/var/lib/puppet/concat/bin]" [
+        fontsize = 8,
+        label = "File[/var/lib/puppet/concat/bin]"
+    ]
+
+    "Stage[main]" [
+        fontsize = 8,
+        label = "Stage[main]"
+    ]
+
+    "Schedule[never]" [
+        fontsize = 8,
+        label = "Schedule[never]"
+    ]
+
+    "Schedule[puppet]" [
+        fontsize = 8,
+        label = "Schedule[puppet]"
+    ]
+
+    "Schedule[monthly]" [
+        fontsize = 8,
+        label = "Schedule[monthly]"
+    ]
+
+    "Schedule[weekly]" [
+        fontsize = 8,
+        label = "Schedule[weekly]"
+    ]
+
+    "Concat::Fragment[test_concat]" [
+        fontsize = 8,
+        label = "Concat::Fragment[test_concat]"
+    ]
+
+    "Class[Main]" [
+        fontsize = 8,
+        label = "Class[Main]"
+    ]
+
+    "File[/var/lib/puppet/concat/_tmp_foo]" [
+        fontsize = 8,
+        label = "File[/var/lib/puppet/concat/_tmp_foo]"
+    ]
+
+    "File[/tmp/foo]" [
+        fontsize = 8,
+        label = "File[/tmp/foo]"
+    ]
+
+    "File[/var/lib/puppet/concat/_tmp_foo/fragments.concat]" [
+        fontsize = 8,
+        label = "File[/var/lib/puppet/concat/_tmp_foo/fragments.concat]"
+    ]
+
+    "Filebucket[puppet]" [
+        fontsize = 8,
+        label = "Filebucket[puppet]"
+    ]
+
+    "Class[Concat::Setup]" [
+        fontsize = 8,
+        label = "Class[Concat::Setup]"
+    ]
+
+    "Class[Concat::Setup]" -> "File[/var/lib/puppet/concat/bin/concatfragments.sh]" [
+        fontsize = 8
+    ]
+
+    "Class[Concat::Setup]" -> "File[/var/lib/puppet/concat]" [
+        fontsize = 8
+    ]
+
+    "Concat::Fragment[test_concat]" -> "File[/var/lib/puppet/concat/_tmp_foo/fragments/10_test_concat]" [
+        fontsize = 8
+    ]
+
+    "Concat[/tmp/foo]" -> "Exec[concat_/tmp/foo]" [
+        fontsize = 8
+    ]
+
+    "Concat[/tmp/foo]" -> "File[/var/lib/puppet/concat/_tmp_foo/fragments.concat.out]" [
+        fontsize = 8
+    ]
+
+    "Class[Main]" -> "Concat[/tmp/foo]" [
+        fontsize = 8
+    ]
+
+    "Class[Concat::Setup]" -> "File[/usr/local/bin/concatfragments.sh]" [
+        fontsize = 8
+    ]
+
+    "Concat[/tmp/foo]" -> "File[/var/lib/puppet/concat/_tmp_foo/fragments]" [
+        fontsize = 8
+    ]
+
+    "Stage[main]" -> "Class[Settings]" [
+        fontsize = 8
+    ]
+
+    "Class[Concat::Setup]" -> "File[/var/lib/puppet/concat/bin]" [
+        fontsize = 8
+    ]
+
+    "Class[Main]" -> "Concat::Fragment[test_concat]" [
+        fontsize = 8
+    ]
+
+    "Stage[main]" -> "Class[Main]" [
+        fontsize = 8
+    ]
+
+    "Concat[/tmp/foo]" -> "File[/var/lib/puppet/concat/_tmp_foo]" [
+        fontsize = 8
+    ]
+
+    "Concat[/tmp/foo]" -> "File[/tmp/foo]" [
+        fontsize = 8
+    ]
+
+    "Concat[/tmp/foo]" -> "File[/var/lib/puppet/concat/_tmp_foo/fragments.concat]" [
+        fontsize = 8
+    ]
+
+    "Stage[main]" -> "Class[Concat::Setup]" [
+        fontsize = 8
+    ]
+
+}
