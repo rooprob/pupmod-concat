@@ -47,6 +47,7 @@ Puppet::Type.newtype(:concat_fragment) do
 
   newparam(:safetarget) do
     desc "Ignore me, I'm a convienience stub"
+    defaultto 'fake'
 
     munge do |value|
       @resource[:target].gsub /\//, '_'
