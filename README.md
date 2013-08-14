@@ -85,7 +85,11 @@ the difference is 1.5s vs 20s.
 
 Copyright
 ---------
-Copyright (C) 2013 Robert Fielding
+Copyright (C) 2013 Robert Fielding <robert.fielding@enterproid.com>
+
+This source has been modified at the API level, see NOTICE.
+
+Copyright (C) 2012 Onyx Point, Inc. <http://onyxpoint.com/>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

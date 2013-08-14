@@ -1,4 +1,9 @@
 #
+# Copyright (C) 2013 Robert Fielding <robert.fielding@enterproid.com>
+#
+# This source has been modified at the API level, see NOTICE.
+#
+#
 # Copyright (C) 2012 Onyx Point, Inc. <http://onyxpoint.com/>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -119,29 +124,7 @@ Puppet::Type.newtype(:concat_fragment) do
         :ensure => 'directory',
         :owner => 'puppet',
         :group => 'puppet',
-        :mode => '0750'
-      ))
-      @catalog.add_resource(Puppet::Type.type(:file).new(
-        :name => "#{Puppet[:vardir]}/concat/output",
-        :ensure => 'directory',
-        :owner => 'puppet',
-        :group => 'puppet',
-        :mode => '0750'
-      ))
-      @catalog.add_resource(Puppet::Type.type(:file).new(
-        :name => "#{Puppet[:vardir]}/concat/fragments",
-        :ensure => 'directory',
-        :owner => 'puppet',
-        :group => 'puppet',
-        :mode => '0750'
-      ))
-      @catalog.add_resource(Puppet::Type.type(:file).new(
-        :name => "#{Puppet[:vardir]}/concat/fragments/#{self[:safetarget]}",
-        :ensure => 'directory',
-        :owner => 'root',
-        :group => 'root',
-        :mode => '0750'
-      ))
+        :mode => '0750'))
     end
   end
 

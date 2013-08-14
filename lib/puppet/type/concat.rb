@@ -1,4 +1,8 @@
 #
+# Copyright (C) 2013 Robert Fielding <robert.fielding@enterproid.com>
+#
+# This source has been modified at the API level, see NOTICE.
+#
 # Copyright (C) 2012 Onyx Point, Inc. <http://onyxpoint.com/>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -202,18 +206,6 @@ Puppet::Type.newtype(:concat) do
               :group => self[:group],
               :mode => self[:mode],
               :subscribe => self))
-      end
-
-      # XXX file object produced by provider/concat/concat.rb:sync()
-      outfile = "#{Puppet[:vardir]}/concat/output/#{self[:safename]}.out"
-      if not @catalog.resource("File[#{outfile}]") then
-          @catalog.add_resource(Puppet::Type.type(:file).new(
-            :name => "#{outfile}",
-            :ensure => 'present',
-            :owner => 'root',
-            :group => 'root',
-            :mode => '0400'
-          ))
       end
   end
 
