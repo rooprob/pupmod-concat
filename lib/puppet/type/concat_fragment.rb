@@ -37,22 +37,25 @@ Puppet::Type.newtype(:concat_fragment) do
 
   newparam(:target) do
     desc "Fully qualified path to copy output file to"
-    defaultto 'unknown'
 
-    validate do |path|
-      unless path =~ /^\/$/ or path =~ /^\/[^\/]/
-        fail Puppet::Error, "File paths must be fully qualified, not '#{path}'"
-      end
+    validate do |value|
+      raise Puppet::Error, "target is not allowed to contain whitespace" if value =~ /\s/
+      raise Puppet::Error, "target is not allowed to have trailing slashes" if value =~ %r{/$}
+      raise Puppet::Error, "target must be an absolute path" if value =~ %r{^[^/]} or value =~ %r{/../}
     end
   end
 
   newparam(:safetarget) do
     desc "Ignore me, I'm a convienience stub"
-    defaultto 'fake'
 
     munge do |value|
       @resource[:target].gsub /\//, '_'
     end
+
+    validate do |value|
+      fail Puppet::Error, "you must specify target" unless value
+    end
+
   end
 
   newparam(:safename) do
@@ -75,22 +78,22 @@ Puppet::Type.newtype(:concat_fragment) do
 
   newproperty(:content) do
 
-    def retrieve
+      def retrieve
 
-    !@frags_to_delete and @frags_to_delete = []
-      return provider.retrieve
-    end
+          !@frags_to_delete and @frags_to_delete = []
+          return provider.retrieve
+      end
 
-    def insync?(is)
-      is and @should or return false
+      def insync?(is)
+          is and @should or return false
 
-      # @should is an Array through Puppet magic.
-      is.strip == @should.first.strip
-    end
+          # @should is an Array through Puppet magic.
+          is.strip == @should.first.strip
+      end
 
-    def sync
-      provider.create
-    end
+      def sync
+          provider.create
+      end
 
   end
 
@@ -106,6 +109,7 @@ Puppet::Type.newtype(:concat_fragment) do
 
   validate do
     fail Puppet::Error, "You must specify content" unless self[:content]
+    fail Puppet::Error, "You must specify target" unless self[:target]
   end
 
   def create_default_build

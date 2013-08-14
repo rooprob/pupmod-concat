@@ -93,11 +93,13 @@ Puppet::Type.newtype(:concat) do
     desc "Fully qualified path to copy output file to"
     defaultto 'unknown'
 
-    validate do |path|
-      unless path == 'unknown' or path =~ /^\/$/ or path =~ /^\/[^\/]/
-        fail Puppet::Error, "File paths must be fully qualified, not '#{path}'"
-      end
+    validate do |value|
+      raise Puppet::Error, "name is not allowed to contain whitespace" if value =~ /\s/
+      raise Puppet::Error, "name is not allowed to have trailing slashes" if value =~ %r{/$}
+      raise Puppet::Error, "name must be an absolute path" if value =~ %r{^[^/]} or value =~ %r{/../}
+      value
     end
+
     munge do |value|
         value
     end
