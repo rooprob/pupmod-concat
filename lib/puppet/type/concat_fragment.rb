@@ -123,7 +123,7 @@ Puppet::Type.newtype(:concat_fragment) do
       ))
     end
     if not @catalog.resource("File[#{Puppet[:vardir]}/concat]") then
-      debug "Auto-adding 'concat' resource File[#{Puppet[:vardir]}/concat] to the catalog"
+      debug "Auto-adding 'concat/output' resource File[#{Puppet[:vardir]}/concat] to the catalog"
       @catalog.add_resource(Puppet::Type.type(:file).new(
         :name => "#{Puppet[:vardir]}/concat",
         :ensure => 'directory',
